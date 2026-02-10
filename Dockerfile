@@ -1,9 +1,7 @@
 FROM node:24-alpine
 
-# Install opencode
-# NOTE: Replace 'npm install -g opencode' with the actual installation command 
-# if opencode is distributed via a binary (e.g., curl/wget).
-RUN npm i -g opencode-ai
+# Install bash for the entrypoint script and opencode-ai
+RUN apk add --no-cache bash && npm i -g opencode-ai
 
 WORKDIR /app
 
