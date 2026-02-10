@@ -1,5 +1,10 @@
-#!/bin/sh
+#!/bin/bash
 set -e
+
+# Ensure both the target and the parent of the symlink exist
+mkdir -p /root/.local/share/opencode/config
+mkdir -p /root/.config
+
 
 # Create symlink for config directory to enable single-volume persistence
 mkdir -p /root/.local/share/opencode/config
