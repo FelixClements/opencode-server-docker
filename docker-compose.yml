@@ -11,7 +11,7 @@ services:
       - HOSTNAME_OVERRIDE=0.0.0.0 # Default in script, but explicit here
       
       # Discovery
-      - MDNS=true
+      - MDNS=false
       - MDNS_DOMAIN=opencode.local
       
       # Security
