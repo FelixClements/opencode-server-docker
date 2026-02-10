@@ -20,4 +20,12 @@ services:
       
       # CORS (Comma separated list)
       - CORS=http://localhost:5173,https://example.com
+
+      # Config directory (use OPENCODE_CONFIG env var for custom path)
+      - OPENCODE_CONFIG_DIR=/root/.local/share/opencode/config
+
+    volumes:
+      # Persistent storage for config, auth, and .opencode directories
+      - ./opencode-data:/root/.local/share/opencode
+
     restart: unless-stopped

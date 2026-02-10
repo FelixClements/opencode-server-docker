@@ -1,6 +1,12 @@
 #!/bin/sh
 set -e
 
+# Create symlink for config directory to enable single-volume persistence
+mkdir -p /root/.local/share/opencode/config
+if [ ! -L /root/.config/opencode ]; then
+    ln -sf /root/.local/share/opencode/config /root/.config/opencode
+fi
+
 # Start with the command "serve"
 COMMAND="serve"
 
