@@ -28,4 +28,8 @@ services:
       # Persistent storage for config, auth, and .opencode directories
       - ./opencode-data:/root/.local/share/opencode
 
+      # Mount current project directory for OpenCode to access and modify
+      # Change the source path if your project is in a different location
+      - .:/workspace
+
     restart: unless-stopped

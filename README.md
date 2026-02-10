@@ -29,11 +29,18 @@ Mount a host directory to `/root/.local/share/opencode` to persist data:
 docker run -d \
   -p 4096:4096 \
   -v ./opencode-data:/root/.local/share/opencode \
+  -v .:/workspace \
   -e OPENCODE_SERVER_PASSWORD=superSecret \
   ghcr.io/felixclements/opencode-server-docker:latest
 ```
 
 Or with Docker Compose, see the `docker-compose.yml` file.
+
+### Project Directory
+
+The current project directory is mounted to `/workspace` inside the container. This allows OpenCode to access and modify your project files. Changes made by OpenCode are immediately visible in your IDE and vice versa.
+
+The `opencode-data/` directory contains user-specific configuration and should not be committed to version control. It is included in `.gitignore`.
 
 ### Directory Structure
 
@@ -97,10 +104,10 @@ OpenCode loads config in this order (later sources override earlier ones):
 ```bash
 docker run -d \
   -p 4096:4096 \
-  -e PORT=4096 \
+  -v ./opencode-data:/root/.local/share/opencode \
+  -v .:/workspace \
   -e OPENCODE_SERVER_PASSWORD=superSecret \
   -e CORS=http://localhost:5173,https://app.example.com \
-  -e MDNS=true \
   ghcr.io/felixclements/opencode-server-docker:latest
 ```
 
@@ -119,6 +126,14 @@ Edit `docker-compose.yml` to customize environment variables and mount volumes f
 ```bash
 docker build -t ghcr.io/felixclements/opencode-server-docker:latest .
 ```
+
+## .gitignore
+
+The repository includes a `.gitignore` file that excludes:
+- `opencode-data/` - User credentials and custom configurations
+- IDE files (`.vscode/`, `.idea/`)
+- OS files (`.DS_Store`, `Thumbs.db`)
+- Environment files (`.env`, `.env.local`)
 
 ## License
 
