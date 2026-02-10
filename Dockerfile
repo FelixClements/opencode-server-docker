@@ -1,11 +1,18 @@
-FROM node:24-alpine
+# 1. Switch to a Debian-based image for glibc compatibility
+FROM node:24-bookworm-slim
 
-# Install bash for the entrypoint script and opencode-ai
-RUN apk add --no-cache bash && npm i -g opencode-ai
+# 2. Install necessary system dependencies (some opencode tools need these)
+RUN apt-get update && apt-get install -y \
+    curl \
+    bash \
+    && rm -rf /var/lib/apt/lists/*
+
+# 3. Install opencode-ai globally
+RUN npm i -g opencode-ai
 
 WORKDIR /app
 
-# Copy the entrypoint script
+# 4. Copy the entrypoint script
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
@@ -18,7 +25,7 @@ ENV OPENCODE_SERVER_USERNAME=opencode
 EXPOSE 4096
 
 # Set the entrypoint
-ENTRYPOINT ["docker-entrypoint.sh"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 
 # Default command runs the server
 CMD ["serve"]
