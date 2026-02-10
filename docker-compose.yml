@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  opencode:
+    image: ghcr.io/FelixClements/opencode-server-docker:latest
+    container_name: opencode-server
+    ports:
+      - "4096:4096"
+    environment:
+      # Server Settings
+      - PORT=4096
+      - HOSTNAME_OVERRIDE=0.0.0.0 # Default in script, but explicit here
+      
+      # Discovery
+      - MDNS=true
+      - MDNS_DOMAIN=opencode.local
+      
+      # Security
+      - OPENCODE_SERVER_USERNAME=admin # Optional, defaults to 'opencode'
+      - OPENCODE_SERVER_PASSWORD=mySecretPass
+      
+      # CORS (Comma separated list)
+      - CORS=http://localhost:5173,https://example.com
+    restart: unless-stopped
