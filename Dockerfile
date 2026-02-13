@@ -5,6 +5,7 @@ FROM node:24-bookworm-slim
 RUN apt-get update && apt-get install -y \
     curl \
     bash \
+    gosu \
     && rm -rf /var/lib/apt/lists/*
 
 # 3. Install opencode-ai globally
