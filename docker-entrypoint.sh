@@ -13,7 +13,7 @@ if [ ! -L /root/.config/opencode ]; then
 fi
 
 # Start with the command "serve"
-COMMAND="serve"
+COMMAND="web"
 
 # 1. Handle Port
 # If PORT env var is set, append --port <val>
