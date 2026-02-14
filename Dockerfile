@@ -18,11 +18,6 @@ WORKDIR /app
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# Environment variables for Authentication
-# OPENCODE_SERVER_PASSWORD is required to enable auth
-#ENV OPENCODE_SERVER_USERNAME=opencode
-# OPENCODE_SERVER_PASSWORD is not set here to force usage at runtime
-
 # Expose the default port
 EXPOSE 4096
 

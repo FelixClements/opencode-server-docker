@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   opencode:
     image: ghcr.io/FelixClements/opencode-server-docker:latest
@@ -22,6 +21,8 @@ services:
 
       # Config directory (use OPENCODE_CONFIG env var for custom path)
       - OPENCODE_CONFIG_DIR=/data/config
+      # Custom config file (use OPENCODE_CONFIG env var for custom config file)
+      - OPENCODE_CONFIG=/data/config/opencode.json
 
     volumes:
       # Persistent storage for config, auth, and .opencode directories

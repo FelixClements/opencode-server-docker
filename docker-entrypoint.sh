@@ -126,6 +126,11 @@ main() {
     
     echo "Starting opencode server..."
     
+    # Ensure OPENCODE_CONFIG is exported if set
+    if [ -n "$OPENCODE_CONFIG" ]; then
+        export OPENCODE_CONFIG
+    fi
+    
     # Execute as the appropriate user
     if [ "$PUID" -ne 0 ] || [ "$PGID" -ne 0 ]; then
         # Drop privileges using gosu
