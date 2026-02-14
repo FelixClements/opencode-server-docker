@@ -6,9 +6,14 @@ PUID=${PUID:-0}
 PGID=${PGID:-0}
 
 # Data directory configuration
-DATA_DIR="/root/.local/share/opencode"
+DATA_DIR="/data"
 CONFIG_DIR="$DATA_DIR/config"
 OPENCODE_DIR="$DATA_DIR/.opencode"
+
+# Export environment variables for the running application
+export DATA_DIR
+export CONFIG_DIR
+export OPENCODE_DIR
 
 # Create the complete directory structure
 create_directories() {
