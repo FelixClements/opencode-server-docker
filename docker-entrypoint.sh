@@ -41,7 +41,7 @@ create_directories() {
     # Symlink for opencode data directory (auth.json, logs, etc.)
     mkdir -p /home/node/.local/share
     if [ ! -L /home/node/.local/share/opencode ]; then
-        ln -sf "$DATA_DIR/opencode" /home/node/.local/share/opencode
+        ln -sf "$OPENCODE_DIR" /home/node/.local/share/opencode
     fi
     
     echo "Directory structure created successfully."
