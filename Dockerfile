@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     bash \
     gosu \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
 # 3. Install opencode-ai globally

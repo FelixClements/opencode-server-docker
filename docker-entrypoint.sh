@@ -38,6 +38,12 @@ create_directories() {
         ln -sf "$CONFIG_DIR" /root/.config/opencode
     fi
     
+    # Symlink for opencode data directory (auth.json, logs, etc.)
+    mkdir -p /home/node/.local/share
+    if [ ! -L /home/node/.local/share/opencode ]; then
+        ln -sf "$DATA_DIR/opencode" /home/node/.local/share/opencode
+    fi
+    
     echo "Directory structure created successfully."
 }
 
@@ -47,6 +53,7 @@ set_ownership() {
         echo "Setting ownership to PUID=$PUID, PGID=$PGID..."
         chown -R "$PUID:$PGID" "$DATA_DIR"
         chown -R "$PUID:$PGID" /root/.config
+        chown -R "$PUID:$PGID" /home/node/.local
     fi
 }
 
