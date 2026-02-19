@@ -6,6 +6,20 @@ on:
     tags: ["v*"]
   pull_request:
     branches: ["main"]
+  workflow_dispatch:
+    inputs:
+      triggered_by:
+        description: 'What triggered this build'
+        required: false
+        default: 'manual'
+      upstream_version:
+        description: 'Upstream version from anomalyco/opencode'
+        required: false
+        default: ''
+      previous_version:
+        description: 'Previous upstream version'
+        required: false
+        default: ''
 
 env:
   REGISTRY: ghcr.io
@@ -37,6 +51,15 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=${{ github.sha }},enable=${{ github.event_name == 'pull_request' }}
+            type=raw,value=upstream-${{ github.event.inputs.upstream_version }},enable=${{ github.event.inputs.upstream_version != '' }}
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5

@@ -1,0 +1,103 @@
+name: Check for Upstream Releases
+
+on:
+  schedule:
+    # Check for new releases once a day at midnight UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+    inputs:
+      force_build:
+        description: 'Force build regardless of version check'
+        required: false
+        default: 'false'
+
+jobs:
+  check-release:
+    runs-on: ubuntu-latest
+    outputs:
+      should_build: ${{ steps.check.outputs.should_build }}
+      new_version: ${{ steps.check.outputs.new_version }}
+      old_version: ${{ steps.check.outputs.old_version }}
+    steps:
+      - name: Get latest release info from upstream
+        id: upstream
+        run: |
+          # Fetch latest release from anomalyco/opencode
+          RELEASE_JSON=$(curl -s -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/anomalyco/opencode/releases/latest)
+          
+          VERSION=$(echo "$RELEASE_JSON" | jq -r '.tag_name')
+          echo "Latest upstream version: $VERSION"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Check if we need to build
+        id: check
+        run: |
+          CURRENT_VERSION=""
+          
+          # Try to get the last built version from git tags
+          if git rev-parse last-built-version >/dev/null 2>&1; then
+            CURRENT_VERSION=$(git rev-parse last-built-version)
+          fi
+          
+          # Also check if there's a recent Docker image tag
+          if [ -z "$CURRENT_VERSION" ]; then
+            # Try GitHub API to get existing image tags
+            TAGS_JSON=$(curl -s -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              https://api.github.com/repos/${{ github.repository }}/git/refs/tags)
+            
+            # Get the most recent tag that matches anomalyco version pattern
+            CURRENT_VERSION=$(echo "$TAGS_JSON" | jq -r '.[] | select(.ref | startswith("refs/tags/anomalyco-")) | .ref' 2>/dev/null | head -1 | sed 's/refs\/tags\/anomalyco-//')
+          fi
+          
+          # For manual dispatch or if no previous version, always build
+          if [ "${{ github.event.inputs.force_build }}" == "true" ] || [ -z "$CURRENT_VERSION" ]; then
+            echo "should_build=true" >> $GITHUB_OUTPUT
+            echo "new_version=${{ steps.upstream.outputs.version }}" >> $GITHUB_OUTPUT
+            echo "old_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+            echo "No previous version found or force build enabled. Will build."
+            exit 0
+          fi
+          
+          # Compare versions
+          if [ "$CURRENT_VERSION" != "${{ steps.upstream.outputs.version }}" ]; then
+            echo "should_build=true" >> $GITHUB_OUTPUT
+            echo "new_version=${{ steps.upstream.outputs.version }}" >> $GITHUB_OUTPUT
+            echo "old_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+            echo "New version detected: ${{ steps.upstream.outputs.version }} (was: $CURRENT_VERSION)"
+          else
+            echo "should_build=false" >> $GITHUB_OUTPUT
+            echo "new_version=${{ steps.upstream.outputs.version }}" >> $GITHUB_OUTPUT
+            echo "old_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+            echo "No new version. Already at: $CURRENT_VERSION"
+          fi
+
+  trigger-build:
+    needs: check-release
+    if: needs.check-release.outputs.should_build == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Docker build workflow
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const workflowId = 'docker-build.yml';
+            
+            // Get the workflow run URL
+            const response = await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: workflowId,
+              ref: 'main',
+              inputs: {
+                triggered_by: 'upstream-release',
+                upstream_version: '${{ needs.check-release.outputs.new_version }}',
+                previous_version: '${{ needs.check-release.outputs.old_version }}'
+              }
+            });
+            
+            console.log('Triggered Docker build for version: ${{ needs.check-release.outputs.new_version }}');
