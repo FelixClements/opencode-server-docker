@@ -14,6 +14,9 @@ on:
 jobs:
   check-release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
     outputs:
       should_build: ${{ steps.check.outputs.should_build }}
       new_version: ${{ steps.check.outputs.new_version }}
@@ -80,6 +83,9 @@ jobs:
     needs: check-release
     if: needs.check-release.outputs.should_build == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: write
     steps:
       - name: Trigger Docker build workflow
         uses: actions/github-script@v7
