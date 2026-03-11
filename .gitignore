@@ -8,7 +8,7 @@ opencode-data/
 *.swp
 *.swo
 *~
-
+.sisyphus/
 # OS files
 .DS_Store
 Thumbs.db

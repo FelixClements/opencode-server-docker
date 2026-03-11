@@ -25,7 +25,6 @@ services:
       - OPENCODE_CONFIG=/data/config/opencode.json
 
     volumes:
-      # Persistent storage for config, auth, and .opencode directories
       - ./opencode-data:/data
 
       # Mount current project directory for OpenCode to access and modify
